@@ -1,0 +1,71 @@
+version: '3'
+
+services:
+
+  keycloak-db:
+    image: postgres:10
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: keycloakdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      
+  keycloak_broker:
+     image: jboss/keycloak:8.0.1
+     restart: on-failure
+     command:
+      - "-b"
+      - "0.0.0.0"
+      - "-Dkeycloak.migration.action=import"
+      - "-Dkeycloak.migration.provider=singleFile"
+      - "-Dkeycloak.migration.file=./broker/realm_saml-identity-broker.json"
+      - "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
+      - "-Djboss.http.port=6971"
+     volumes:
+       - ./config:/config/
+     environment:
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: password        
+        DB_VENDOR: postgres
+        DB_USER: admin
+        DB_PASSWORD: password
+        DB_ADDR: keycloak-db
+        DB_PORT: 5432
+        DB_DATABASE: keycloakdb
+     ports:
+        - 6971:6971
+     depends_on:
+       - keycloak-db
+       
+    keycloak_idp:
+     image: jboss/keycloak:8.0.1
+     restart: on-failure
+     command:
+      - "-b"
+      - "0.0.0.0"
+      - "-Dkeycloak.migration.action=import"
+      - "-Dkeycloak.migration.provider=singleFile"
+      - "-Dkeycloak.migration.file=/idp/realm-external-saml-provider.json"
+      - "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
+      - "-Djboss.http.port=7981"
+     volumes:
+       - ./config:/config/
+     environment:
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: password        
+        DB_VENDOR: postgres
+        DB_USER: admin
+        DB_PASSWORD: password
+        DB_ADDR: keycloak-db
+        DB_PORT: 5432
+        DB_DATABASE: keycloakdb
+     ports:
+        - 7981:7981
+     depends_on:
+       - keycloak-db     
+       
+volumes:
+  pgdata:
+    driver: local
+    
