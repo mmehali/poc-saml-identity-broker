@@ -1,0 +1,16 @@
+# keycloak-spring
+Un exemple d'un application spring boot securisée avec serveur Keycloak agissant 
+comme un coutier agissant pour un autres IDP IDP Keycloak
+
+# Setup Keycloak using docker
+Browse to the `keycloak` folder and invoke the `docker-compose.yml` script. This will setup two instances of Keycloak. One will live on `locolhost:6971` and shall act as an identity broker for the second Keycloak instance living on `localhost:7981`. In order to setup the two Keycloak instances correctly, use the realm import configurations in the `broker` and `idp` folders.
+
+## Admin pages
+Each Keycloak instance has its own admin page. Login using the credentials (username, password) = (admin, admin) at:
+* http://localhost:6971/auth/admin
+* http://localhost:7981/auth/admin
+
+## General user aspect
+Étant donné que la première instance de Keycloak (Broker:) se comporte comme un courtier pour l'IDP Keycloak, les utilisateurs doivent être gérés dans le deuxième serveur Keycloak (External-IDP). Ajouter des utilisateurs et leur attribuer des rôles dans la deuxième instance de Keycloak fera automatiquement ajuster le courtier en ajoutant / ajustant les utilisateurs correspondants dans sa propre base de données locale.
+
+
